@@ -1,0 +1,22 @@
+if [ $(sed -n 1p $mountpoint/etc/nosavemod_exceptions.txt) == 1 ]; then
+  c=`tail -c 1 /etc/nosavemod_exceptions.txt `
+  if [ "$c" != "" ]; then echo >>/etc/nosavemod_exceptions.txt ; fi
+  for f in $mountpoint/var/lib/clover/profiles/0/*; do
+    if [ -d $f ]; then
+      if [ "$f" == "$mountpoint/var/lib/clover/profiles/0/home-menu" ] || [ "$f" == "$mountpoint/var/lib/clover/profiles/0/hakchi" ] || [ "$f" == "$mountpoint/var/lib/clover/profiles/0/FOLDER" ] ;then
+        continue
+      fi
+      keep=0
+      while read p; do
+        if [ "$f" == "/var/lib/clover/profiles/0/$p" ]; then
+          keep=1
+        fi
+      done <$mountpoint/etc/nosavemod_exceptions.txt
+      if [ $keep == 0 ]; then
+        rm -rf "$f"
+      fi
+    fi
+  done 
+else
+  echo First line of /etc/nosavemod_exceptions.txt must be 1 to run nosavemod_exceptions > /dev/tty0
+fi
